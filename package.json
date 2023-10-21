@@ -1,0 +1,26 @@
+{
+  "name": "graph-map-tutorial",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "vite --mode web --host"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.3.1",
+    "@types/three": "^0.152.1",
+    "eslint": "^8.49.0",
+    "prettier": "2.8.8",
+    "typescript": "^5.1.3",
+    "vite": "^4.4.9",
+    "vite-plugin-checker": "^0.6.2",
+    "vite-plugin-svgr": "^4.1.0",
+    "vite-tsconfig-paths": "^4.2.0"
+  },
+  "dependencies": {
+    "three": "^0.157.0"
+  }
+}
