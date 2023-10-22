@@ -4,12 +4,14 @@ import { Renderer } from './Renderer';
 import { IActionScene } from '@/IActionScene';
 
 export class House {
-  model: Group;
-  renderer: Renderer;
-  scene: Scene;
-  camera: PerspectiveCamera;
-  ground: Ground;
-  raycaster = new Raycaster();
+  readonly model: Group;
+  readonly renderer: Renderer;
+  readonly scene: Scene;
+  readonly camera: PerspectiveCamera;
+  readonly ground: Ground;
+  readonly raycaster = new Raycaster();
+
+  private _isMount: boolean = false;
 
   handlePointerMove = (event: MouseEvent) => {
     const pointer = new Vector2();
@@ -30,29 +32,46 @@ export class House {
   handleStayHouse = () => {
     window.removeEventListener('pointermove', this.handlePointerMove);
     this.setOpacity(1);
+    this._isMount = true;
   };
 
   constructor(actionScene: IActionScene, model: Group) {
     this.model = model;
+
+    this.model.userData = this;
+
+    this.attachMeshes();
+    this.setOpacity(0.5);
+
     this.renderer = actionScene.renderer;
     this.camera = actionScene.camera;
     this.scene = actionScene.scene;
     this.ground = actionScene.ground;
 
-    this.setOpacity(0.5);
-
     window.addEventListener('pointermove', this.handlePointerMove);
     window.addEventListener('dblclick', this.handleStayHouse);
+  }
+
+  get isMount() {
+    return this._isMount;
   }
 
   rotate() {
     this.model.rotateX;
   }
 
-  private setOpacity(opacity: number) {
+  attachMeshes() {
     this.model.traverse((child) => {
       if (child instanceof Mesh) {
         child.material = child.material.clone();
+        child.userData = this;
+      }
+    });
+  }
+
+  private setOpacity(opacity: number) {
+    this.model.traverse((child) => {
+      if (child instanceof Mesh) {
         child.material.transparent = true;
         child.material.opacity = opacity;
       }

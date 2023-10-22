@@ -8,6 +8,7 @@ const initScene = new InitScene();
 initScene.start();
 
 const loadAssetsScene = new LoadAssetsScene(initScene);
+loadAssetsScene.start();
 
 // @ts-ignore
 window.actionScene = loadAssetsScene;
