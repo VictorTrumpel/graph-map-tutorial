@@ -52,6 +52,7 @@ export class House {
   private setOpacity(opacity: number) {
     this.model.traverse((child) => {
       if (child instanceof Mesh) {
+        child.material = child.material.clone();
         child.material.transparent = true;
         child.material.opacity = opacity;
       }

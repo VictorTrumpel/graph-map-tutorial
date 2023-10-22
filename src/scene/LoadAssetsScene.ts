@@ -73,7 +73,7 @@ export class LoadAssetsScene implements IActionScene {
 
     if (!houseGLTF) return;
 
-    const houseModel = houseGLTF.scene.clone();
+    const houseModel = houseGLTF.scene.clone(true);
 
     const house = new House(this, houseModel);
 

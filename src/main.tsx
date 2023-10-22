@@ -9,6 +9,9 @@ initScene.start();
 
 const loadAssetsScene = new LoadAssetsScene(initScene);
 
+// @ts-ignore
+window.actionScene = loadAssetsScene;
+
 const root = createRoot(document.getElementById('root')!);
 
 root.render(<HouseMenu scene={loadAssetsScene} />);
