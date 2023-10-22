@@ -1,17 +1,17 @@
 import { Scene, Color, PerspectiveCamera } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { Grid } from './shared/Grid';
-import { Renderer } from './shared/Renderer';
-import { Ground } from './shared/Ground';
-import { HemiLight } from './shared/HemiLight';
-import { DirectLight } from './shared/DirectLight';
-import { IActionScene } from './IActionScene';
+import { Grid } from '../shared/Grid';
+import { Renderer } from '../shared/Renderer';
+import { Ground } from '../shared/Ground';
+import { HemiLight } from '../shared/HemiLight';
+import { DirectLight } from '../shared/DirectLight';
+import { IActionScene } from '../IActionScene';
 
 export class InitScene implements IActionScene {
-  private renderer: Renderer;
-
-  scene: Scene;
-  camera: PerspectiveCamera;
+  readonly renderer: Renderer;
+  readonly scene: Scene;
+  readonly camera: PerspectiveCamera;
+  readonly ground: Ground;
 
   onWindowResize = () => {
     this.camera.aspect = window.innerWidth / window.innerHeight;
@@ -38,8 +38,8 @@ export class InitScene implements IActionScene {
     const directionalLight = new DirectLight();
     this.scene.add(directionalLight);
 
-    const ground = new Ground();
-    this.scene.add(ground);
+    this.ground = new Ground();
+    this.scene.add(this.ground);
 
     const grid = new Grid();
     this.scene.add(grid);
