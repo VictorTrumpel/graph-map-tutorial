@@ -3,6 +3,7 @@ import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
 import { IActionScene } from '@/IActionScene';
 import { House } from '@/shared/House';
 import { PathLine } from '@/shared/PathLine';
+import { IndexDB } from '@/IndexDB';
 
 export class MainFlowScene {
   private actionScene: IActionScene;
@@ -18,14 +19,16 @@ export class MainFlowScene {
   private pathLine: PathLine | null = null;
   private fromHouse: House | null = null;
 
-  handleKeyDown = (event: KeyboardEvent) => {
+  private indexDb: IndexDB = new IndexDB();
+
+  private handleKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'Escape' && this.pathLine) {
       this.scene.remove(this.pathLine);
     }
     window.removeEventListener('keydown', this.handleKeyDown);
   };
 
-  handleWindowDbClick = (event: MouseEvent) => {
+  private handleWindowDbClick = (event: MouseEvent) => {
     const pointer = this.getPointerPosition(event);
 
     this.raycaster.setFromCamera(pointer, this.camera);
@@ -37,12 +40,21 @@ export class MainFlowScene {
     this.createPathFrom(house);
   };
 
-  handleMouseMove = (event: PointerEvent) => {
+  private handleMouseMove = (event: PointerEvent) => {
     if (!this.pathLine || !this.fromHouse) return;
 
     const pointer = this.getPointerPosition(event);
 
     this.aimPathLine(pointer);
+  };
+
+  private handleMountHouse = (house: House, title: string) => {
+    this.indexDb.saveHouseInfo({
+      id: house.id,
+      positionX: house.model.position.x,
+      positionZ: house.model.position.z,
+      assetTitle: title,
+    });
   };
 
   constructor(actionScene: IActionScene, assetMap: Map<string, GLTF>) {
@@ -101,6 +113,8 @@ export class MainFlowScene {
     const houseModel = houseGLTF.scene.clone(true);
 
     const house = new House(this.actionScene, houseModel);
+
+    house.onMount = () => this.handleMountHouse(house, houseTitle);
 
     this.scene.add(house.model);
   }
