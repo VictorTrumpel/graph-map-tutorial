@@ -1,7 +1,7 @@
 import { Button } from 'antd';
-import { LoadAssetsScene } from './scene/LoadAssetsScene';
+import { MainFlowScene } from './scene/MainFlowScene';
 
-export const HouseMenu = ({ scene }: { scene: LoadAssetsScene }) => {
+export const HouseMenu = ({ scene }: { scene: MainFlowScene }) => {
   const handleClick = (title: string) => {
     scene.createHouse(title);
   };

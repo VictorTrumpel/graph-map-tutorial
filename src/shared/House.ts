@@ -19,14 +19,7 @@ export class House {
     pointer.x = (event.clientX / this.renderer.domElement.clientWidth) * 2 - 1;
     pointer.y = -(event.clientY / this.renderer.domElement.clientHeight) * 2 + 1;
 
-    this.raycaster.setFromCamera(pointer, this.camera);
-
-    const intersects = this.raycaster.intersectObject(this.ground)[0];
-
-    if (intersects?.point) {
-      this.model.position.x = intersects.point.x;
-      this.model.position.z = intersects.point.z;
-    }
+    this.moveAlognGround(pointer);
   };
 
   handleStayHouse = () => {
@@ -67,6 +60,17 @@ export class House {
         child.userData = this;
       }
     });
+  }
+
+  moveAlognGround(pointer: Vector2) {
+    this.raycaster.setFromCamera(pointer, this.camera);
+
+    const intersects = this.raycaster.intersectObject(this.ground)[0];
+
+    if (intersects?.point) {
+      this.model.position.x = intersects.point.x;
+      this.model.position.z = intersects.point.z;
+    }
   }
 
   private setOpacity(opacity: number) {
