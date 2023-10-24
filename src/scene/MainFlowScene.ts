@@ -67,6 +67,8 @@ export class MainFlowScene {
 
   async start() {
     window.addEventListener('dblclick', this.handleWindowDbClick);
+
+    await this.arrangeHousesFromIndexDb();
   }
 
   createPathFrom(house: unknown) {
@@ -105,18 +107,45 @@ export class MainFlowScene {
     }
   }
 
-  createHouse(houseTitle: string) {
+  mountDraftHouseOnScene(houseTitle: string) {
+    const house = this.createHouseByTitle(houseTitle);
+
+    if (!house) return;
+
+    house.onMount = () => this.handleMountHouse(house, houseTitle);
+
+    this.scene.add(house.model);
+  }
+
+  private async arrangeHousesFromIndexDb() {
+    const housesInfo = await this.indexDb.getAllHousesInfo();
+
+    for (const info of housesInfo) {
+      const house = this.createHouseByTitle(info.assetTitle);
+
+      if (!house) continue;
+
+      this.scene.add(house.model);
+
+      house.model.position.x = info.positionX;
+      house.model.position.z = info.positionZ;
+
+      house.mountHouse();
+    }
+  }
+
+  private createHouseByTitle(houseTitle: string) {
+    console.log('houseTitle :>> ', houseTitle);
+
     const houseGLTF = this.assetMap.get(houseTitle);
 
-    if (!houseGLTF) return;
+    if (!houseGLTF) return null;
 
     const houseModel = houseGLTF.scene.clone(true);
 
     const house = new House(this.actionScene, houseModel);
 
-    house.onMount = () => this.handleMountHouse(house, houseTitle);
-
-    this.scene.add(house.model);
+    return house;
   }
 
   private aimPathLine(pointer: Vector2) {

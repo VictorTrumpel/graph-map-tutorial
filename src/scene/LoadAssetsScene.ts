@@ -4,6 +4,7 @@ import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { IActionScene } from '@/IActionScene';
 import { InitScene } from './InitScene';
 import { Ground } from '@/shared/Ground';
+import { IndexDB } from '@/IndexDB';
 
 const assets = [
   {
@@ -36,36 +37,26 @@ export class LoadAssetsScene implements IActionScene {
 
   readonly assetMap = new Map<string, GLTF>();
 
-  handleModelLoad = (prop: (typeof assets)[number], gltf: GLTF) => {
-    gltf.scene.scale.set(...(prop.scale as [number, number, number]));
-    this.assetMap.set(prop.title, gltf);
-  };
-
-  handleChankLoad = (event: ProgressEvent<EventTarget>) => {
-    // console.log((event.loaded / event.total) * 100 + '% loaded');
-  };
-
-  handleErrorLoad = (error: ErrorEvent) => {
-    console.log('An error happened');
-  };
+  private loader: GLTFLoader = new GLTFLoader();
 
   constructor(scene: InitScene) {
     this.scene = scene.scene;
     this.camera = scene.camera;
     this.renderer = scene.renderer;
     this.ground = scene.ground;
+  }
 
-    const loader = new GLTFLoader();
-
+  async start() {
     for (const asset of assets) {
-      loader.load(
-        asset.path,
-        this.handleModelLoad.bind(null, asset),
-        this.handleChankLoad,
-        this.handleErrorLoad
-      );
+      const gltf = await this.loadModel(asset.path);
+      gltf.scene.scale.set(...(asset.scale as [number, number, number]));
+      this.assetMap.set(asset.title, gltf);
     }
   }
 
-  async start() {}
+  async loadModel(path: string): Promise<GLTF> {
+    return new Promise((res, rej) => {
+      this.loader.load(path, res, () => null, rej);
+    });
+  }
 }

@@ -6,20 +6,22 @@ import { IndexDB } from './IndexDB';
 import { MainFlowScene } from './scene/MainFlowScene';
 import './index.css';
 
-new IndexDB();
+const indexDb = new IndexDB();
 
-const initScene = new InitScene();
-initScene.start();
+indexDb.onSuccessOpened = async () => {
+  const initScene = new InitScene();
+  initScene.start();
 
-const loadAssetsScene = new LoadAssetsScene(initScene);
-loadAssetsScene.start();
+  const loadAssetsScene = new LoadAssetsScene(initScene);
+  await loadAssetsScene.start();
 
-const mainFlowScene = new MainFlowScene(initScene, loadAssetsScene.assetMap);
-mainFlowScene.start();
+  const mainFlowScene = new MainFlowScene(initScene, loadAssetsScene.assetMap);
+  mainFlowScene.start();
 
-// @ts-ignore
-window.actionScene = loadAssetsScene;
+  // @ts-ignore
+  window.actionScene = loadAssetsScene;
 
-const root = createRoot(document.getElementById('root')!);
+  const root = createRoot(document.getElementById('root')!);
 
-root.render(<HouseMenu scene={mainFlowScene} />);
+  root.render(<HouseMenu scene={mainFlowScene} />);
+};

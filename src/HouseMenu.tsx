@@ -3,7 +3,7 @@ import { MainFlowScene } from './scene/MainFlowScene';
 
 export const HouseMenu = ({ scene }: { scene: MainFlowScene }) => {
   const handleClick = (title: string) => {
-    scene.createHouse(title);
+    scene.mountDraftHouseOnScene(title);
   };
 
   return (

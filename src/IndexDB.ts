@@ -16,8 +16,11 @@ export class IndexDB {
 
   static _INSTANСE: null | IndexDB = null;
 
+  onSuccessOpened: (() => void) | null = null;
+
   handleSuccessOpened = () => {
     this.db = this.openRequest.result;
+    this.onSuccessOpened?.();
   };
 
   handleUpgradeNeeded = () => {
@@ -47,8 +50,32 @@ export class IndexDB {
   saveHouseInfo(info: TableCols) {
     if (!this.db) return;
 
-    const tx = this.db.transaction(this.name, 'readwrite');
-    const store = tx.objectStore(this.name);
+    const transaction = this.db.transaction(this.name, 'readwrite');
+    const store = transaction.objectStore(this.name);
     store.add(info);
+  }
+
+  getAllHousesInfo(): Promise<TableCols[]> {
+    return new Promise((res) => {
+      if (!this.db) {
+        res([]);
+        return;
+      }
+
+      const transaction = this.db.transaction(this.name, 'readwrite');
+      const store = transaction.objectStore(this.name);
+
+      const request = store.getAll();
+
+      request.onsuccess = (event) => {
+        const target = event.target as unknown as { result: TableCols[] };
+        res(target.result);
+        return;
+      };
+
+      request.onerror = () => {
+        res([]);
+      };
+    });
   }
 }

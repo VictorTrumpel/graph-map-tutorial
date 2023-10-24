@@ -27,14 +27,7 @@ export class House {
   };
 
   private handleMountHouse = () => {
-    window.removeEventListener('pointermove', this.handlePointerMove);
-    this.setOpacity(1);
-    this._isMount = true;
-
-    this.onMount?.();
-
-    window.removeEventListener('pointermove', this.handlePointerMove);
-    window.removeEventListener('dblclick', this.handleMountHouse);
+    this.mountHouse();
   };
 
   constructor(actionScene: IActionScene, model: Group) {
@@ -68,6 +61,17 @@ export class House {
       this.model.position.x = intersects.point.x;
       this.model.position.z = intersects.point.z;
     }
+  }
+
+  mountHouse() {
+    window.removeEventListener('pointermove', this.handlePointerMove);
+    this.setOpacity(1);
+    this._isMount = true;
+
+    this.onMount?.();
+
+    window.removeEventListener('pointermove', this.handlePointerMove);
+    window.removeEventListener('dblclick', this.handleMountHouse);
   }
 
   private attachMeshes() {
