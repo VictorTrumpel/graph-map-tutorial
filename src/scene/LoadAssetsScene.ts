@@ -4,7 +4,6 @@ import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { IActionScene } from '@/IActionScene';
 import { InitScene } from './InitScene';
 import { Ground } from '@/shared/Ground';
-import { IndexDB } from '@/IndexDB';
 
 const assets = [
   {

@@ -4,6 +4,7 @@ import { IActionScene } from '@/IActionScene';
 import { House } from '@/shared/House';
 import { PathLine } from '@/shared/PathLine';
 import { IndexDB } from '@/IndexDB';
+import { HousesGraph, HouseNode } from '@/HouseGraph/HousesGraph';
 
 export class MainFlowScene {
   private actionScene: IActionScene;
@@ -20,6 +21,8 @@ export class MainFlowScene {
   private fromHouse: House | null = null;
 
   private indexDb: IndexDB = new IndexDB();
+
+  private housesGraph = new HousesGraph();
 
   private handleKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'Escape' && this.pathLine) {
@@ -78,16 +81,27 @@ export class MainFlowScene {
 
     const hasPointFrom = Boolean(this.fromHouse && this.pathLine);
 
-    if (this.fromHouse !== house && hasPointFrom) {
+    if (this.fromHouse !== house && hasPointFrom && this.fromHouse) {
+      const fromPosition = this.fromHouse.model.position;
+      const toPosition = house.model.position;
+
       this.pathLine!.setFromTo(
-        [this.fromHouse!.model.position.x, 0, this.fromHouse!.model.position.z],
-        [house.model.position.x, 0, house.model.position.z]
+        [fromPosition.x, 0, fromPosition.z],
+        [toPosition.x, 0, toPosition.z]
       );
+
+      const houseNode1 = new HouseNode(this.fromHouse.id);
+      const houseNode2 = new HouseNode(house.id);
+
+      this.housesGraph.addChildren(houseNode1, houseNode2);
+
       this.fromHouse = null;
       this.pathLine = null;
 
       window.removeEventListener('keydown', this.handleKeyDown);
       window.removeEventListener('pointermove', this.handleMouseMove);
+
+      this.indexDb.saveHousesGraph(this.housesGraph);
 
       return;
     }
@@ -135,8 +149,6 @@ export class MainFlowScene {
   }
 
   private createHouseByTitle(houseTitle: string) {
-    console.log('houseTitle :>> ', houseTitle);
-
     const houseGLTF = this.assetMap.get(houseTitle);
 
     if (!houseGLTF) return null;

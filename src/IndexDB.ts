@@ -1,3 +1,5 @@
+import { HousesGraph } from './HouseGraph/HousesGraph';
+
 type TableCols = {
   id: string;
   positionX: number;
@@ -8,7 +10,7 @@ type TableCols = {
 export class IndexDB {
   private name = 'houses';
 
-  private version = 3;
+  private version = 6;
 
   private openRequest!: IDBOpenDBRequest;
 
@@ -26,7 +28,13 @@ export class IndexDB {
   handleUpgradeNeeded = () => {
     const db = this.openRequest.result;
 
-    db.createObjectStore(this.name, { keyPath: 'id' });
+    if (!db.objectStoreNames.contains('houses')) {
+      db.createObjectStore(this.name, { keyPath: 'id' });
+    }
+
+    if (!db.objectStoreNames.contains('housesPaths')) {
+      db.createObjectStore('housesPaths');
+    }
 
     this.db = db;
   };
@@ -53,6 +61,14 @@ export class IndexDB {
     const transaction = this.db.transaction(this.name, 'readwrite');
     const store = transaction.objectStore(this.name);
     store.add(info);
+  }
+
+  saveHousesGraph(housesGraph: HousesGraph) {
+    if (!this.db) return;
+    const transaction = this.db.transaction('housesPaths', 'readwrite');
+    const store = transaction.objectStore('housesPaths');
+    store.delete('paths');
+    store.add(housesGraph, 'paths');
   }
 
   getAllHousesInfo(): Promise<TableCols[]> {
