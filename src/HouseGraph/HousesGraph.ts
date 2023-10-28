@@ -13,6 +13,10 @@ export class HouseNode {
 export class HousesGraph {
   readonly graph: Map<string, HouseNode> = new Map();
 
+  constructor(graph?: HousesGraph['graph']) {
+    if (graph) this.graph = graph;
+  }
+
   addChildren(node1: HouseNode, node2: HouseNode) {
     if (node1.childrenIds.has(node2.id)) {
       return;

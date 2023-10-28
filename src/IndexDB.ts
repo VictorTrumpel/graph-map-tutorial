@@ -94,4 +94,28 @@ export class IndexDB {
       };
     });
   }
+
+  getHousesPaths(): Promise<HousesGraph | undefined> {
+    return new Promise((res) => {
+      if (!this.db) {
+        res(undefined);
+        return;
+      }
+
+      const transaction = this.db.transaction('housesPaths', 'readwrite');
+      const store = transaction.objectStore('housesPaths');
+
+      const request = store.getAll();
+
+      request.onsuccess = (event) => {
+        const target = event.target as unknown as { result: HousesGraph[] };
+        res(target.result[0]);
+        return;
+      };
+
+      request.onerror = () => {
+        res(undefined);
+      };
+    });
+  }
 }

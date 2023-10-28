@@ -30,7 +30,7 @@ export class House {
     this.mountHouse();
   };
 
-  constructor(actionScene: IActionScene, model: Group) {
+  constructor(actionScene: IActionScene, model: Group, id?: string) {
     this.model = model;
 
     this.model.userData = this;
@@ -42,7 +42,7 @@ export class House {
     this.camera = actionScene.camera;
     this.scene = actionScene.scene;
     this.ground = actionScene.ground;
-    this.id = uuidv4();
+    this.id = id || uuidv4();
 
     window.addEventListener('pointermove', this.handlePointerMove);
     window.addEventListener('dblclick', this.handleMountHouse);

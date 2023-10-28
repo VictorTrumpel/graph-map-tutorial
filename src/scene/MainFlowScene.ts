@@ -22,7 +22,9 @@ export class MainFlowScene {
 
   private indexDb: IndexDB = new IndexDB();
 
-  private housesGraph = new HousesGraph();
+  private housesPathGraph = new HousesGraph();
+
+  private housesMap = new Map<string, House>();
 
   private handleKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'Escape' && this.pathLine) {
@@ -52,6 +54,8 @@ export class MainFlowScene {
   };
 
   private handleMountHouse = (house: House, title: string) => {
+    this.housesMap.set(house.id, house);
+
     this.indexDb.saveHouseInfo({
       id: house.id,
       positionX: house.model.position.x,
@@ -71,7 +75,8 @@ export class MainFlowScene {
   async start() {
     window.addEventListener('dblclick', this.handleWindowDbClick);
 
-    await this.arrangeHousesFromIndexDb();
+    await this.mountHousesFromIndexDb();
+    await this.moutPathsFromIndexDb();
   }
 
   createPathFrom(house: unknown) {
@@ -90,10 +95,11 @@ export class MainFlowScene {
         [toPosition.x, 0, toPosition.z]
       );
 
-      const houseNode1 = new HouseNode(this.fromHouse.id);
-      const houseNode2 = new HouseNode(house.id);
+      const houseNode1 =
+        this.housesPathGraph.graph.get(this.fromHouse.id) || new HouseNode(this.fromHouse.id);
+      const houseNode2 = this.housesPathGraph.graph.get(house.id) || new HouseNode(house.id);
 
-      this.housesGraph.addChildren(houseNode1, houseNode2);
+      this.housesPathGraph.addChildren(houseNode1, houseNode2);
 
       this.fromHouse = null;
       this.pathLine = null;
@@ -101,7 +107,7 @@ export class MainFlowScene {
       window.removeEventListener('keydown', this.handleKeyDown);
       window.removeEventListener('pointermove', this.handleMouseMove);
 
-      this.indexDb.saveHousesGraph(this.housesGraph);
+      this.indexDb.saveHousesGraph(this.housesPathGraph);
 
       return;
     }
@@ -121,25 +127,36 @@ export class MainFlowScene {
     }
   }
 
-  mountDraftHouseOnScene(houseTitle: string) {
-    const house = this.createHouseByTitle(houseTitle);
+  mountPathFromTo(houseFrom: House, houseTo: House) {
+    const pathLine = new PathLine();
+    pathLine.setFromTo(
+      [houseFrom.model.position.x, 0, houseFrom.model.position.z],
+      [houseTo.model.position.x, 0, houseTo.model.position.z]
+    );
+    this.scene.add(pathLine);
+  }
+
+  mountDraftHouseOnScene(assetTitle: string) {
+    const house = this.createHouseByAssetTitle(assetTitle);
 
     if (!house) return;
 
-    house.onMount = () => this.handleMountHouse(house, houseTitle);
+    house.onMount = () => this.handleMountHouse(house, assetTitle);
 
     this.scene.add(house.model);
   }
 
-  private async arrangeHousesFromIndexDb() {
+  private async mountHousesFromIndexDb() {
     const housesInfo = await this.indexDb.getAllHousesInfo();
 
     for (const info of housesInfo) {
-      const house = this.createHouseByTitle(info.assetTitle);
+      const house = this.createHouseByAssetTitle(info.assetTitle, info.id);
 
       if (!house) continue;
 
       this.scene.add(house.model);
+
+      this.housesMap.set(house.id, house);
 
       house.model.position.x = info.positionX;
       house.model.position.z = info.positionZ;
@@ -148,14 +165,52 @@ export class MainFlowScene {
     }
   }
 
-  private createHouseByTitle(houseTitle: string) {
-    const houseGLTF = this.assetMap.get(houseTitle);
+  private async moutPathsFromIndexDb() {
+    const housesGraph = await this.indexDb.getHousesPaths();
+
+    if (!housesGraph) return;
+
+    this.housesPathGraph = new HousesGraph(housesGraph.graph);
+
+    const graph = this.housesPathGraph.graph;
+
+    const queue = [...graph.values()];
+
+    const visitedNodes = new Set<string>();
+
+    while (queue.length) {
+      const node = queue.pop();
+
+      if (node === undefined) break;
+
+      if (visitedNodes.has(node.id)) continue;
+
+      visitedNodes.add(node.id);
+
+      const parentHouse = this.housesMap.get(node.id);
+
+      if (!parentHouse) continue;
+
+      for (const childNode of node.children) {
+        const childHouse = this.housesMap.get(childNode.id);
+
+        if (!childHouse || visitedNodes.has(childNode.id)) continue;
+
+        this.mountPathFromTo(parentHouse, childHouse);
+      }
+
+      queue.push(...node.children);
+    }
+  }
+
+  private createHouseByAssetTitle(assetTitle: string, id?: string) {
+    const houseGLTF = this.assetMap.get(assetTitle);
 
     if (!houseGLTF) return null;
 
     const houseModel = houseGLTF.scene.clone(true);
 
-    const house = new House(this.actionScene, houseModel);
+    const house = new House(this.actionScene, houseModel, id);
 
     return house;
   }

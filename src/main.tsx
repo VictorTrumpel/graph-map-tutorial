@@ -10,10 +10,10 @@ const indexDb = new IndexDB();
 
 indexDb.onSuccessOpened = async () => {
   const initScene = new InitScene();
-  initScene.start();
 
   const loadAssetsScene = new LoadAssetsScene(initScene);
   await loadAssetsScene.start();
+  initScene.start();
 
   const mainFlowScene = new MainFlowScene(initScene, loadAssetsScene.assetMap);
   mainFlowScene.start();
