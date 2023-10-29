@@ -6,7 +6,7 @@ import { HouseNode } from '@/HouseGraph/HousesGraph';
 import { Camera, Raycaster, Scene, Vector2, Renderer } from 'three';
 import { IActionScene } from '@/IActionScene';
 
-export class PathRenderer {
+export class PathPainter {
   private housesPathGraph = new HousesGraph();
   private indexDb: IndexDB = new IndexDB();
   private raycaster: Raycaster = new Raycaster();
@@ -121,8 +121,6 @@ export class PathRenderer {
 
   private async mountPathsFromIndexDb() {
     const housesGraph = await this.indexDb.getHousesPaths();
-
-    console.log('housesGraph :>> ', housesGraph);
 
     if (!housesGraph) return;
 
