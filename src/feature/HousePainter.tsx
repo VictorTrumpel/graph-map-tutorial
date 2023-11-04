@@ -2,6 +2,7 @@ import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
 import { House } from '@/shared/House';
 import { IActionScene } from '@/IActionScene';
 import { IndexDB } from '@/IndexDB';
+import { assetsConfig } from '@/constants/assetsConfig';
 
 export class HousePainter {
   private actionScene: IActionScene;
@@ -25,6 +26,7 @@ export class HousePainter {
       positionX: house.model.position.x,
       positionZ: house.model.position.z,
       assetTitle: title,
+      houseName: house.name,
     });
   };
 
@@ -32,6 +34,9 @@ export class HousePainter {
     const house = this.createHouseByAssetTitle(assetTitle);
 
     if (!house) return;
+
+    house.createSphereController();
+    house.createHouseLabel();
 
     house.onMount = () => this.handleMountHouse(house, assetTitle);
 
@@ -46,12 +51,16 @@ export class HousePainter {
 
       if (!house) continue;
 
+      house.name = info.houseName;
+
       this.actionScene.scene.add(house.model);
 
       this.housesMap.set(house.id, house);
 
       house.model.position.x = info.positionX;
       house.model.position.z = info.positionZ;
+
+      house.createHouseLabel();
 
       house.mountHouse();
     }
@@ -60,11 +69,13 @@ export class HousePainter {
   private createHouseByAssetTitle(assetTitle: string, id?: string) {
     const houseGLTF = this.assetMap.get(assetTitle);
 
-    if (!houseGLTF) return null;
+    const assetConfig = assetsConfig.find(({ title }) => title === assetTitle);
+
+    if (!houseGLTF || !assetConfig) return null;
 
     const houseModel = houseGLTF.scene.clone(true);
 
-    const house = new House(this.actionScene, houseModel, id);
+    const house = new House(this.actionScene, houseModel, assetConfig, id);
 
     return house;
   }

@@ -2,7 +2,7 @@ import { GridHelper } from 'three';
 
 export class Grid extends GridHelper {
   constructor() {
-    super(40, 20, 0x000000, 0x000000);
+    super(100, 20, 0x000000, 0x000000);
 
     const gridMaterial = this.material;
     const isMaterialArr = gridMaterial instanceof Array;

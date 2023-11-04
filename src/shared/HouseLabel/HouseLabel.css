@@ -1,0 +1,15 @@
+.house-label {
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.input-house-address {
+  margin-bottom: 10px;
+}
+
+.input-house-address.ant-input-disabled {
+  text-align: center;
+  color: black;
+}

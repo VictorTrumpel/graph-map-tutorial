@@ -5,6 +5,7 @@ type TableCols = {
   positionX: number;
   positionZ: number;
   assetTitle: string;
+  houseName: string;
 };
 
 export class IndexDB {

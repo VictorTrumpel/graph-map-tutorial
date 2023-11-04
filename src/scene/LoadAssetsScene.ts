@@ -1,38 +1,18 @@
 import { Scene, PerspectiveCamera } from 'three';
 import { Renderer } from '../shared/Renderer';
 import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { IActionScene } from '@/IActionScene';
 import { InitScene } from './InitScene';
 import { Ground } from '@/shared/Ground';
-
-const assets = [
-  {
-    title: 'castle',
-    path: '/castle.glb',
-    scale: [0.5, 0.5, 0.5],
-  },
-  {
-    title: 'pizzashop',
-    path: '/pizzashop.glb',
-    scale: [0.7, 0.7, 0.7],
-  },
-  {
-    title: 'shack',
-    path: '/shack.glb',
-    scale: [1.1, 1.1, 1.1],
-  },
-  {
-    title: 'woodhouse',
-    path: '/woodhouse.glb',
-    scale: [1.5, 1.5, 1.5],
-  },
-];
+import { assetsConfig } from '@/constants/assetsConfig';
 
 export class LoadAssetsScene implements IActionScene {
   readonly scene: Scene;
   readonly camera: PerspectiveCamera;
   readonly renderer: Renderer;
   readonly ground: Ground;
+  readonly orbitControls: OrbitControls;
 
   readonly assetMap = new Map<string, GLTF>();
 
@@ -43,12 +23,13 @@ export class LoadAssetsScene implements IActionScene {
     this.camera = scene.camera;
     this.renderer = scene.renderer;
     this.ground = scene.ground;
+    this.orbitControls = scene.orbitControls;
   }
 
   async start() {
-    for (const asset of assets) {
+    for (const asset of assetsConfig) {
       const gltf = await this.loadModel(asset.path);
-      gltf.scene.scale.set(...(asset.scale as [number, number, number]));
+      // gltf.scene.scale.set(...(asset.scale as [number, number, number]));
       this.assetMap.set(asset.title, gltf);
     }
   }

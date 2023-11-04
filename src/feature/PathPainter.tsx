@@ -63,6 +63,7 @@ export class PathPainter {
 
   mountPathFromTo(houseFrom: House, houseTo: House) {
     const pathLine = new PathLine();
+
     pathLine.setFromTo(
       [houseFrom.model.position.x, 0, houseFrom.model.position.z],
       [houseTo.model.position.x, 0, houseTo.model.position.z]
