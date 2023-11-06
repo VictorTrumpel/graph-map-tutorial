@@ -17,7 +17,7 @@
 }
 
 .find-path-container .ant-steps-item {
-  min-height: 100px;
+  min-height: 60px;
 }
 
 .find-path-container .ant-steps-item:nth-last-child(1) {

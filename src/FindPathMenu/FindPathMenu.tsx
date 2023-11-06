@@ -45,28 +45,30 @@ export const FindPathMenu = ({ pathPainter }: { pathPainter: PathPainter | null 
     const nodeFrom = pathPainter.housesPathGraph.graph.get(nodeIdsMap.from);
     const nodeTo = pathPainter.housesPathGraph.graph.get(nodeIdsMap.to);
 
-    if (nodeFrom && nodeTo) {
-      const paths = pathPainter.housesPathGraph.getAllPaths(nodeFrom, nodeTo);
+    const paths =
+      nodeFrom && nodeTo ? pathPainter.housesPathGraph.getAllPaths(nodeFrom, nodeTo) : [];
 
-      setPathsList(paths);
-      setFindError('');
-    } else {
-      setPathsList([]);
-      setFindError('Маршрут не найден');
-    }
+    setPathsList(paths);
+    setFindError(paths.length === 0 ? 'Маршрут не найден' : '');
   };
 
   if (!pathPainter) return <></>;
 
   return (
     <Card rootClassName='find-path-container' title='Найти маршрут'>
-      <Flex gap='middle' vertical>
-        <Input placeholder='откуда' value={values.from} onChange={(e) => handleChange('from', e)} />
-        <Input placeholder='куда' value={values.to} onChange={(e) => handleChange('to', e)} />
-        <Button type='primary' onClick={handleFindPath}>
-          Найти
-        </Button>
-      </Flex>
+      <form action='#'>
+        <Flex gap='middle' vertical>
+          <Input
+            placeholder='откуда'
+            value={values.from}
+            onChange={(e) => handleChange('from', e)}
+          />
+          <Input placeholder='куда' value={values.to} onChange={(e) => handleChange('to', e)} />
+          <Button htmlType='submit' type='primary' onClick={handleFindPath}>
+            Найти
+          </Button>
+        </Flex>
+      </form>
 
       {findError ? (
         <Alert type='info' message={findError} style={{ marginTop: '20px' }} />

@@ -9,7 +9,7 @@ export class PathLine extends Line2 {
     geometry.setColors([1, 1, 1, 1, 1, 1]);
 
     const matLine = new LineMaterial({
-      color: color || 0x998b88,
+      color: color || 0x635c5a,
       linewidth: 0.005,
       vertexColors: true,
     });
