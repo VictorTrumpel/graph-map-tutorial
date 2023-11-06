@@ -1,17 +1,23 @@
-import { BufferGeometry, LineBasicMaterial, Line, BufferAttribute } from 'three';
+import { Line2 } from 'three/examples/jsm/lines/Line2';
+import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry';
+import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial';
 
-export class PathLine extends Line {
-  constructor() {
-    const geometry = new BufferGeometry();
+export class PathLine extends Line2 {
+  constructor(color?: number) {
+    const geometry = new LineGeometry();
+    geometry.setPositions([1, 1, 1, 5, 5, 5]);
+    geometry.setColors([1, 1, 1, 1, 1, 1]);
 
-    const material = new LineBasicMaterial({ color: 0x4080ff });
+    const matLine = new LineMaterial({
+      color: color || 0x998b88,
+      linewidth: 0.005,
+      vertexColors: true,
+    });
 
-    super(geometry, material);
+    super(geometry, matLine);
   }
 
   setFromTo(fromPoint: [number, number, number], toPoint: [number, number, number]) {
-    const vertices = new Float32Array([...fromPoint, ...toPoint]);
-
-    this.geometry.setAttribute('position', new BufferAttribute(vertices, 3));
+    this.geometry.setPositions([...fromPoint, ...toPoint]);
   }
 }
