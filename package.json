@@ -13,6 +13,7 @@
     "@babel/preset-typescript": "^7.23.2",
     "@jest/globals": "^29.7.0",
     "@types/jest": "^29.5.6",
+    "@types/lodash.debounce": "^4.0.8",
     "@types/node": "^20.3.1",
     "@types/react-dom": "^18.2.14",
     "@types/three": "^0.152.1",
@@ -30,6 +31,7 @@
   },
   "dependencies": {
     "antd": "^5.10.2",
+    "lodash.debounce": "^4.0.8",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "three": "^0.157.0",

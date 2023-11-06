@@ -7,6 +7,7 @@ import { Ground } from '../shared/Ground';
 import { HemiLight } from '../shared/HemiLight';
 import { DirectLight } from '../shared/DirectLight';
 import { IActionScene } from '../IActionScene';
+import debounce from 'lodash.debounce';
 
 export class InitScene implements IActionScene {
   readonly renderer: Renderer;
@@ -24,6 +25,15 @@ export class InitScene implements IActionScene {
     this.renderer2D.setSize(window.innerWidth, window.innerHeight);
   };
 
+  onChangeCamera = debounce(() => {
+    localStorage.setItem(
+      'camera',
+      JSON.stringify({
+        position: this.camera.position,
+      })
+    );
+  }, 300);
+
   private animate = () => {
     requestAnimationFrame(this.animate);
     this.renderer.render(this.scene, this.camera);
@@ -35,7 +45,8 @@ export class InitScene implements IActionScene {
     this.scene.background = new Color(0xa0a0a0);
 
     this.camera = new PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 500);
-    this.camera.position.set(11.355728920849053, 50.579716475504686, 100.31142433676645);
+
+    this.camera.position.set(...this.getSafeCameraPosition());
 
     const hemiLight = new HemiLight();
     this.scene.add(hemiLight);
@@ -61,7 +72,16 @@ export class InitScene implements IActionScene {
     this.orbitControls.target.set(0, 0.5, 0);
     this.orbitControls.update();
 
+    this.orbitControls.addEventListener('change', this.onChangeCamera);
+
     window.addEventListener('resize', this.onWindowResize);
+  }
+
+  private getSafeCameraPosition(): [number, number, number] {
+    const cameraData = localStorage.getItem('camera');
+    if (!cameraData) return [11.355728920849053, 50.579716475504686, 100.31142433676645];
+    const position = JSON.parse(cameraData).position;
+    return [position.x, position.y, position.z];
   }
 
   async start() {
