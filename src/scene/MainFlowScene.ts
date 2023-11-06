@@ -10,6 +10,8 @@ export class MainFlowScene {
 
   private housePainter: HousePainter | null = null;
 
+  pathPainter: PathPainter | null = null;
+
   constructor(actionScene: IActionScene, assetMap: Map<string, GLTF>) {
     this.assetMap = assetMap;
     this.actionScene = actionScene;
@@ -18,7 +20,7 @@ export class MainFlowScene {
   async start() {
     const housePainter = new HousePainter(this.actionScene, this.assetMap);
     this.housePainter = housePainter;
-    new PathPainter(this.actionScene, housePainter.housesMap);
+    this.pathPainter = new PathPainter(this.actionScene, housePainter.housesMap);
   }
 
   mountDraftHouseOnScene(assetTitle: string) {

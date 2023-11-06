@@ -32,6 +32,17 @@ export class PathPainter {
     this.mountPathsFromIndexDb();
   }
 
+  mountPathFromTo(houseFrom: House, houseTo: House) {
+    const pathLine = new PathLine();
+
+    pathLine.setFromTo(
+      [houseFrom.model.position.x, 0, houseFrom.model.position.z],
+      [houseTo.model.position.x, 0, houseTo.model.position.z]
+    );
+
+    this.scene.add(pathLine);
+  }
+
   private handleWindowDbClick = (event: MouseEvent) => {
     const pointer = this.getPointerPosition(event);
 
@@ -60,17 +71,6 @@ export class PathPainter {
 
     this.aimPathLine(pointer);
   };
-
-  mountPathFromTo(houseFrom: House, houseTo: House) {
-    const pathLine = new PathLine();
-
-    pathLine.setFromTo(
-      [houseFrom.model.position.x, 0, houseFrom.model.position.z],
-      [houseTo.model.position.x, 0, houseTo.model.position.z]
-    );
-
-    this.scene.add(pathLine);
-  }
 
   private pickHouse(house: unknown) {
     const isRealHouse = house instanceof House;

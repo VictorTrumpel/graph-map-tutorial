@@ -1,9 +1,10 @@
 import { InitScene } from './scene/InitScene';
 import { LoadAssetsScene } from './scene/LoadAssetsScene';
 import { createRoot } from 'react-dom/client';
-import { HouseMenu } from './HouseMenu';
+import { HouseMenu } from './HouseMenu/HouseMenu';
 import { IndexDB } from './IndexDB';
 import { MainFlowScene } from './scene/MainFlowScene';
+import { FindPathMenu } from './FindPathMenu/FindPathMenu';
 import './index.css';
 
 const indexDb = new IndexDB();
@@ -23,5 +24,10 @@ indexDb.onSuccessOpened = async () => {
 
   const root = createRoot(document.getElementById('root')!);
 
-  root.render(<HouseMenu scene={mainFlowScene} />);
+  root.render(
+    <>
+      <HouseMenu scene={mainFlowScene} />
+      <FindPathMenu pathPainter={mainFlowScene.pathPainter} />
+    </>
+  );
 };

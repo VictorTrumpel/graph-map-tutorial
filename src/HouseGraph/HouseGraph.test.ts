@@ -71,4 +71,52 @@ describe('Тестирование метода hasPath', () => {
     expect(houseGraph.hasPath(house5, house2)).toBe(true);
     expect(houseGraph.hasPath(house5, house6)).toBe(false);
   });
+
+  describe('Тестирование метода dfsFindPaths', () => {
+    test(`
+      Возвращает все возможные пути между A и D
+    `, () => {
+      const houseGraph = new HousesGraph();
+
+      const a = new HouseNode('A');
+      const b = new HouseNode('B');
+      const c = new HouseNode('C');
+      const d = new HouseNode('D');
+      const e = new HouseNode('E');
+      const k = new HouseNode('K');
+
+      houseGraph.addChildren(a, b);
+      houseGraph.addChildren(a, k);
+      houseGraph.addChildren(b, k);
+      houseGraph.addChildren(b, c);
+      houseGraph.addChildren(b, d);
+      houseGraph.addChildren(c, d);
+      houseGraph.addChildren(c, e);
+      houseGraph.addChildren(e, d);
+
+      const paths = houseGraph.getAllPaths(a, d);
+
+      const existingPaths = [
+        [a, b, c, d],
+        [a, b, c, e, d],
+        [a, b, d],
+        [a, k, b, c, d],
+        [a, k, b, c, e, d],
+        [a, k, b, d],
+      ];
+
+      expect(paths.length).toBe(6);
+
+      for (let i = 0; i < existingPaths.length; i++) {
+        const path = paths[i];
+        const existPath = existingPaths[i];
+
+        for (let j = 0; j < existPath.length; j++) {
+          if (existPath[j] !== path[j]) {
+            throw new Error(`результаты отличаются на i=${i} j=${j}`);
+          }
+        }
+      }
+    });
+  });
 });

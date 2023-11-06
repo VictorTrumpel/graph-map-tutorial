@@ -56,5 +56,36 @@ export class HousesGraph {
     return false;
   }
 
-  getPath(node1: HouseNode, node2: HouseNode) {}
+  getAllPaths(fromNode: HouseNode, toNode: HouseNode) {
+    const record: HouseNode[][] = [];
+    this.dfsFindPaths(fromNode, toNode, new Set([fromNode]), record);
+    return record;
+  }
+
+  private dfsFindPaths(
+    fromNode: HouseNode,
+    toNode: HouseNode,
+    visitedNodes: Set<HouseNode>,
+    recordPaths: HouseNode[][]
+  ) {
+    if (fromNode === toNode) {
+      recordPaths.push([...visitedNodes]);
+      visitedNodes.delete(fromNode);
+      return;
+    }
+
+    const children = fromNode.children;
+
+    for (const childNode of children) {
+      const isChildNodeVisited = visitedNodes.has(childNode);
+
+      if (isChildNodeVisited) continue;
+
+      visitedNodes.add(childNode);
+
+      this.dfsFindPaths(childNode, toNode, visitedNodes, recordPaths);
+    }
+
+    visitedNodes.delete(fromNode);
+  }
 }
