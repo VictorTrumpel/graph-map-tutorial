@@ -2,4 +2,28 @@
   position: absolute;
   left: 20px;
   top: 100px;
+  width: 350px;
+}
+
+.find-path-container .path-container {
+  background-color: inherit;
+  margin-top: 20px;
+}
+
+.find-path-container .paths-list-container {
+  padding-right: 10px;
+  max-height: 400px;
+  overflow-y: scroll;
+}
+
+.find-path-container .ant-steps-item {
+  min-height: 100px;
+}
+
+.find-path-container .ant-steps-item:nth-last-child(1) {
+  min-height: auto;
+}
+
+.find-path-container .ant-steps .ant-steps-item-container .ant-steps-item-tail::after {
+  background-color: black;
 }

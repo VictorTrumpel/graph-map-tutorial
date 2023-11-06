@@ -7,7 +7,8 @@ import { Camera, Raycaster, Scene, Vector2, Renderer } from 'three';
 import { IActionScene } from '@/IActionScene';
 
 export class PathPainter {
-  private housesPathGraph = new HousesGraph();
+  housesPathGraph = new HousesGraph();
+
   private indexDb: IndexDB = new IndexDB();
   private raycaster: Raycaster = new Raycaster();
 
@@ -15,7 +16,8 @@ export class PathPainter {
   private camera: Camera;
   private renderer: Renderer;
   private ground: IActionScene['ground'];
-  private housesMap: Map<string, House>;
+
+  readonly housesMap: Map<string, House>;
 
   private fromHouse: House | null = null;
   private pathLine: PathLine | null = null;
