@@ -32,7 +32,7 @@ export class InitScene implements IActionScene {
         position: this.camera.position,
       })
     );
-  }, 300);
+  }, 100);
 
   private animate = () => {
     requestAnimationFrame(this.animate);

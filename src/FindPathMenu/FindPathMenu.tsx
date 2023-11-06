@@ -17,6 +17,23 @@ export const FindPathMenu = ({ pathPainter }: { pathPainter: PathPainter | null 
     setValues({ ...values, [name]: e.target.value });
   };
 
+  const handlePathClick = (nodesPath: HouseNode[]) => {
+    if (!pathPainter) return;
+
+    for (let i = 0; i < nodesPath.length - 1; i++) {
+      const currentNode = nodesPath[i];
+      const nextNode = nodesPath[i + 1];
+
+      const pathMesh =
+        pathPainter.pathMap.get(`${currentNode.id}-${nextNode.id}`) ||
+        pathPainter.pathMap.get(`${nextNode.id}-${currentNode.id}`);
+
+      if (!pathMesh) continue;
+
+      pathMesh.setColor(0x4096ff);
+    }
+  };
+
   const handleFindPath = async () => {
     if (!pathPainter) return;
 
@@ -56,7 +73,7 @@ export const FindPathMenu = ({ pathPainter }: { pathPainter: PathPainter | null 
 
   return (
     <Card rootClassName='find-path-container' title='Найти маршрут'>
-      <form action='#'>
+      <form action='#' onSubmit={(e) => e.preventDefault()}>
         <Flex gap='middle' vertical>
           <Input
             placeholder='откуда'
@@ -78,6 +95,7 @@ export const FindPathMenu = ({ pathPainter }: { pathPainter: PathPainter | null 
             return (
               <Alert
                 key={id}
+                onClick={() => handlePathClick(path)}
                 className='path-container'
                 description={<Path path={path} housesMap={pathPainter.housesMap} />}
               />

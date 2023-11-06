@@ -18,6 +18,7 @@ export class PathPainter {
   private ground: IActionScene['ground'];
 
   readonly housesMap: Map<string, House>;
+  readonly pathMap: Map<string, PathLine> = new Map();
 
   private fromHouse: House | null = null;
   private pathLine: PathLine | null = null;
@@ -41,6 +42,8 @@ export class PathPainter {
       [houseFrom.model.position.x, 0, houseFrom.model.position.z],
       [houseTo.model.position.x, 0, houseTo.model.position.z]
     );
+
+    this.pathMap.set(`${houseFrom.id}-${houseTo.id}`, pathLine);
 
     this.scene.add(pathLine);
   }

@@ -1,3 +1,4 @@
+import { Color } from 'three';
 import { Line2 } from 'three/examples/jsm/lines/Line2';
 import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry';
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial';
@@ -19,5 +20,9 @@ export class PathLine extends Line2 {
 
   setFromTo(fromPoint: [number, number, number], toPoint: [number, number, number]) {
     this.geometry.setPositions([...fromPoint, ...toPoint]);
+  }
+
+  setColor(color: number) {
+    this.material.color = new Color(color);
   }
 }
