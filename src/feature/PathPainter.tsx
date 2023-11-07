@@ -97,6 +97,8 @@ export class PathPainter {
         this.housesPathGraph.graph.get(this.fromHouse.id) || new HouseNode(this.fromHouse.id);
       const houseNode2 = this.housesPathGraph.graph.get(house.id) || new HouseNode(house.id);
 
+      this.pathMap.set(`${this.fromHouse!.id}-${house.id}`, this.pathLine!);
+
       this.housesPathGraph.addChildren(houseNode1, houseNode2);
 
       this.fromHouse = null;

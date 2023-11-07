@@ -1,4 +1,4 @@
-import { Scene, Color, PerspectiveCamera } from 'three';
+import { Scene, Color, PerspectiveCamera, Fog } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer';
 import { Grid } from '../shared/Grid';
