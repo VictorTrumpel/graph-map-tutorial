@@ -4,6 +4,7 @@ import { Card, Input, Flex, Button, Alert, Steps } from 'antd';
 import { PathPainter } from '@/feature/PathPainter';
 import { IndexDB } from '@/IndexDB';
 import { House } from '@/shared/House';
+import cn from 'classnames';
 import './FindPathMenu.css';
 
 export const FindPathMenu = ({ pathPainter }: { pathPainter: PathPainter | null }) => {
@@ -13,12 +14,29 @@ export const FindPathMenu = ({ pathPainter }: { pathPainter: PathPainter | null 
 
   const [findError, setFindError] = useState('');
 
+  const [activePath, setActivePath] = useState<HouseNode[]>([]);
+
+  const [activePathId, setActivePathId] = useState<string>('');
+
   const handleChange = (name: 'from' | 'to', e: ChangeEvent<HTMLInputElement>) => {
     setValues({ ...values, [name]: e.target.value });
   };
 
   const handlePathClick = (nodesPath: HouseNode[]) => {
     if (!pathPainter) return;
+
+    for (let i = 0; i < activePath.length - 1; i++) {
+      const currentNode = activePath[i];
+      const nextNode = activePath[i + 1];
+
+      const pathMesh =
+        pathPainter.pathMap.get(`${currentNode.id}-${nextNode.id}`) ||
+        pathPainter.pathMap.get(`${nextNode.id}-${currentNode.id}`);
+
+      if (!pathMesh) continue;
+
+      pathMesh.setColor(0x635c5a);
+    }
 
     for (let i = 0; i < nodesPath.length - 1; i++) {
       const currentNode = nodesPath[i];
@@ -32,6 +50,9 @@ export const FindPathMenu = ({ pathPainter }: { pathPainter: PathPainter | null 
 
       pathMesh.setColor(0x4096ff);
     }
+
+    setActivePathId(nodesPath.map(({ id }) => id).join());
+    setActivePath(nodesPath);
   };
 
   const handleFindPath = async () => {
@@ -73,7 +94,7 @@ export const FindPathMenu = ({ pathPainter }: { pathPainter: PathPainter | null 
 
   return (
     <Card rootClassName='find-path-container' title='Найти маршрут'>
-      <form action='#' onSubmit={(e) => e.preventDefault()}>
+      <form onSubmit={(e) => e.preventDefault()}>
         <Flex gap='middle' vertical>
           <Input
             placeholder='откуда'
@@ -92,11 +113,13 @@ export const FindPathMenu = ({ pathPainter }: { pathPainter: PathPainter | null 
       ) : (
         <div className='paths-list-container'>
           {pathsList.map((path, id) => {
+            const pathId = path.map(({ id }) => id).join();
+
             return (
               <Alert
-                key={id}
+                key={pathId}
                 onClick={() => handlePathClick(path)}
-                className='path-container'
+                className={cn('path-container', { active: pathId === activePathId })}
                 description={<Path path={path} housesMap={pathPainter.housesMap} />}
               />
             );

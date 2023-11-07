@@ -16,6 +16,15 @@
   overflow-y: scroll;
 }
 
+.path-container {
+  cursor: pointer;
+  transition: 0.3s ease-in-out background-color;
+}
+
+.path-container.active {
+  background-color: #e6f4ff;
+}
+
 .find-path-container .ant-steps-item {
   min-height: 60px;
 }
