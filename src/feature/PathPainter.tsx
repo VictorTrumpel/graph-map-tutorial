@@ -3,31 +3,31 @@ import { IndexDB } from '@/IndexDB';
 import { PathLine } from '@/shared/PathLine';
 import { House } from '@/shared/House';
 import { HouseNode } from '@/feature/HouseGraph/HousesGraph';
-import { Camera, Raycaster, Scene, Vector2, Renderer } from 'three';
+import { Camera, Raycaster, Scene, Vector2, Renderer, Intersection, Object3D, Event } from 'three';
+import { Ground } from '@/shared/Ground';
 import { IActionScene } from '@/IActionScene';
 
 export class PathPainter {
   housesPathGraph = new HousesGraph();
 
   private indexDb: IndexDB = new IndexDB();
-  private raycaster: Raycaster = new Raycaster();
 
   private scene: Scene;
   private camera: Camera;
-  private renderer: Renderer;
-  private ground: IActionScene['ground'];
 
   readonly housesMap: Map<string, House>;
   readonly pathMap: Map<string, PathLine> = new Map();
 
-  private fromHouse: House | null = null;
-  private pathLine: PathLine | null = null;
+  private houseFrom: House | null = null;
+  private fromPathLine: PathLine | null = null;
+
+  getPointerPosition = (_: PointerEvent | MouseEvent) => new Vector2();
+  getIntersectWithGround: (pointer: Vector2) => Intersection<Object3D<Event>> | null = () => null;
+  getIntersectWithScene: (pointer: Vector2) => Intersection<Object3D<Event>>[] | null = () => null;
 
   constructor(actionScene: IActionScene, housesMap: Map<string, House>) {
     this.scene = actionScene.scene;
     this.camera = actionScene.camera;
-    this.renderer = actionScene.renderer;
-    this.ground = actionScene.ground;
     this.housesMap = housesMap;
 
     window.addEventListener('dblclick', this.handleWindowDbClick);
@@ -35,96 +35,84 @@ export class PathPainter {
     this.mountPathsFromIndexDb();
   }
 
-  mountPathFromTo(houseFrom: House, houseTo: House) {
-    const pathLine = new PathLine();
-
-    pathLine.setFromTo(
-      [houseFrom.model.position.x, 0, houseFrom.model.position.z],
-      [houseTo.model.position.x, 0, houseTo.model.position.z]
-    );
-
-    this.pathMap.set(`${houseFrom.id}-${houseTo.id}`, pathLine);
-
-    this.scene.add(pathLine);
-  }
-
-  private handleWindowDbClick = (event: MouseEvent) => {
-    const pointer = this.getPointerPosition(event);
-
-    this.raycaster.setFromCamera(pointer, this.camera);
-
-    const firstIntersect = this.raycaster.intersectObjects(this.scene.children, true)[0];
-
-    const house = firstIntersect?.object?.userData;
-
-    if (house instanceof House) {
-      this.pickHouse(house);
-    }
-  };
-
   private handleKeyDown = (event: KeyboardEvent) => {
-    if (event.key === 'Escape' && this.pathLine) {
-      this.scene.remove(this.pathLine);
+    if (event.key === 'Escape' && this.fromPathLine) {
+      this.houseFrom = null;
+      this.scene.remove(this.fromPathLine);
     }
     window.removeEventListener('keydown', this.handleKeyDown);
   };
 
-  private handleMouseMove = (event: PointerEvent) => {
-    if (!this.pathLine || !this.fromHouse) return;
-
+  private handleWindowDbClick = (event: MouseEvent) => {
     const pointer = this.getPointerPosition(event);
 
-    this.aimPathLine(pointer);
-  };
+    const pickedElement = this.getIntersectWithScene(pointer)?.[0];
 
-  private pickHouse(house: unknown) {
-    const isRealHouse = house instanceof House;
+    const house = pickedElement?.object?.userData;
 
-    if (!isRealHouse || !house.isMount) return;
+    const isHouse = house instanceof House;
 
-    const hasPointFrom = Boolean(this.fromHouse && this.pathLine);
+    if (!isHouse) return;
 
-    if (this.fromHouse !== house && hasPointFrom && this.fromHouse) {
-      const fromPosition = this.fromHouse.model.position;
-      const toPosition = house.model.position;
+    const isPathStarted = this.houseFrom === null;
 
-      this.pathLine!.setFromTo(
-        [fromPosition.x, 0, fromPosition.z],
-        [toPosition.x, 0, toPosition.z]
-      );
-
-      const houseNode1 =
-        this.housesPathGraph.graph.get(this.fromHouse.id) || new HouseNode(this.fromHouse.id);
-      const houseNode2 = this.housesPathGraph.graph.get(house.id) || new HouseNode(house.id);
-
-      this.pathMap.set(`${this.fromHouse!.id}-${house.id}`, this.pathLine!);
-
-      this.housesPathGraph.addChildren(houseNode1, houseNode2);
-
-      this.fromHouse = null;
-      this.pathLine = null;
-
-      window.removeEventListener('keydown', this.handleKeyDown);
-      window.removeEventListener('pointermove', this.handleMouseMove);
-
-      this.indexDb.saveHousesGraph(this.housesPathGraph);
-
-      return;
-    }
-
-    if (this.fromHouse === null) {
-      this.fromHouse = house;
-
-      this.pathLine = new PathLine();
-      this.pathLine.setFromTo(
-        [house.model.position.x, 0, house.model.position.z],
-        [house.model.position.x, 0, house.model.position.z]
-      );
-      this.scene.add(this.pathLine);
+    if (isPathStarted) {
+      this.startPathFrom(house);
 
       window.addEventListener('keydown', this.handleKeyDown);
       window.addEventListener('pointermove', this.handleMouseMove);
+      return;
     }
+
+    this.finishPathTo(house);
+    window.removeEventListener('keydown', this.handleKeyDown);
+    window.removeEventListener('pointermove', this.handleMouseMove);
+  };
+
+  private handleMouseMove = (event: PointerEvent) => {
+    if (!this.fromPathLine || !this.houseFrom) return;
+    const pointer = this.getPointerPosition(event);
+    this.aimPathLine(pointer);
+  };
+
+  private startPathFrom(house: House) {
+    this.houseFrom = house;
+
+    this.fromPathLine = new PathLine();
+    this.fromPathLine.setFromTo(
+      [house.model.position.x, 0, house.model.position.z],
+      [house.model.position.x, 0, house.model.position.z]
+    );
+
+    this.scene.add(this.fromPathLine);
+  }
+
+  private finishPathTo(houseTo: House) {
+    const houseFrom = this.houseFrom;
+    const fromPathLine = this.fromPathLine;
+
+    const houseGraph = this.housesPathGraph.graph;
+
+    const isPathStarted = houseFrom && fromPathLine;
+
+    if (!isPathStarted) return;
+
+    const positionFrom = houseFrom.model.position;
+    const positionTo = houseTo.model.position;
+
+    fromPathLine.setFromTo([positionFrom.x, 0, positionFrom.z], [positionTo.x, 0, positionTo.z]);
+
+    const houseNode1 = houseGraph.get(houseFrom.id) || new HouseNode(houseFrom.id);
+    const houseNode2 = houseGraph.get(houseTo.id) || new HouseNode(houseTo.id);
+
+    this.pathMap.set(`${houseFrom.id}-${houseTo.id}`, fromPathLine);
+
+    this.housesPathGraph.addChildren(houseNode1, houseNode2);
+
+    this.houseFrom = null;
+    this.fromPathLine = null;
+
+    this.indexDb.saveHousesGraph(this.housesPathGraph);
   }
 
   private async mountPathsFromIndexDb() {
@@ -165,29 +153,31 @@ export class PathPainter {
     }
   }
 
+  private mountPathFromTo(houseFrom: House, houseTo: House) {
+    const pathLine = new PathLine();
+
+    pathLine.setFromTo(
+      [houseFrom.model.position.x, 0, houseFrom.model.position.z],
+      [houseTo.model.position.x, 0, houseTo.model.position.z]
+    );
+
+    this.pathMap.set(`${houseFrom.id}-${houseTo.id}`, pathLine);
+
+    this.scene.add(pathLine);
+  }
+
   private aimPathLine(pointer: Vector2) {
-    if (!this.fromHouse || !this.pathLine) {
+    if (!this.houseFrom || !this.fromPathLine) {
       throw new Error('Need fromHouse to aim');
     }
 
-    this.raycaster.setFromCamera(pointer, this.camera);
+    const intersect = this.getIntersectWithGround(pointer);
 
-    const intersects = this.raycaster.intersectObject(this.ground)[0];
+    if (!intersect) return;
 
-    if (!intersects) return;
-
-    this.pathLine.setFromTo(
-      [this.fromHouse.model.position.x, 0, this.fromHouse.model.position.z],
-      [intersects.point.x, 0, intersects.point.z]
+    this.fromPathLine.setFromTo(
+      [this.houseFrom.model.position.x, 0, this.houseFrom.model.position.z],
+      [intersect.point.x, 0, intersect.point.z]
     );
-  }
-
-  private getPointerPosition(event: PointerEvent | MouseEvent) {
-    const pointer = new Vector2();
-
-    pointer.x = (event.clientX / this.renderer.domElement.clientWidth) * 2 - 1;
-    pointer.y = -(event.clientY / this.renderer.domElement.clientHeight) * 2 + 1;
-
-    return pointer;
   }
 }
