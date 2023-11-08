@@ -1,8 +1,8 @@
-import { HousesGraph } from '@/HouseGraph/HousesGraph';
+import { HousesGraph } from '@/feature/HouseGraph/HousesGraph';
 import { IndexDB } from '@/IndexDB';
 import { PathLine } from '@/shared/PathLine';
 import { House } from '@/shared/House';
-import { HouseNode } from '@/HouseGraph/HousesGraph';
+import { HouseNode } from '@/feature/HouseGraph/HousesGraph';
 import { Camera, Raycaster, Scene, Vector2, Renderer } from 'three';
 import { IActionScene } from '@/IActionScene';
 

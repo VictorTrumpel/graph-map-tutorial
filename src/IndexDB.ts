@@ -1,4 +1,4 @@
-import { HousesGraph } from './HouseGraph/HousesGraph';
+import { HousesGraph } from './feature/HouseGraph/HousesGraph';
 
 type TableCols = {
   id: string;
@@ -21,12 +21,12 @@ export class IndexDB {
 
   onSuccessOpened: (() => void) | null = null;
 
-  handleSuccessOpened = () => {
+  private readonly handleSuccessOpened = () => {
     this.db = this.openRequest.result;
     this.onSuccessOpened?.();
   };
 
-  handleUpgradeNeeded = () => {
+  private readonly handleUpgradeNeeded = () => {
     const db = this.openRequest.result;
 
     if (!db.objectStoreNames.contains('houses')) {
@@ -59,8 +59,8 @@ export class IndexDB {
   saveHouseInfo(info: TableCols) {
     if (!this.db) return;
 
-    const transaction = this.db.transaction(this.name, 'readwrite');
-    const store = transaction.objectStore(this.name);
+    const transaction = this.db.transaction('houses', 'readwrite');
+    const store = transaction.objectStore('houses');
     store.add(info);
   }
 

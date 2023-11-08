@@ -29,7 +29,6 @@ export class LoadAssetsScene implements IActionScene {
   async start() {
     for (const asset of assetsConfig) {
       const gltf = await this.loadModel(asset.path);
-      // gltf.scene.scale.set(...(asset.scale as [number, number, number]));
       this.assetMap.set(asset.title, gltf);
     }
   }

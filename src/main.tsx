@@ -1,10 +1,10 @@
 import { InitScene } from './scene/InitScene';
 import { LoadAssetsScene } from './scene/LoadAssetsScene';
 import { createRoot } from 'react-dom/client';
-import { HouseMenu } from './HouseMenu/HouseMenu';
+import { HouseMenu } from './feature/HouseMenu/HouseMenu';
 import { IndexDB } from './IndexDB';
 import { MainFlowScene } from './scene/MainFlowScene';
-import { FindPathMenu } from './FindPathMenu/FindPathMenu';
+import { FindPathMenu } from './feature/FindPathMenu/FindPathMenu';
 import './index.css';
 
 const indexDb = new IndexDB();

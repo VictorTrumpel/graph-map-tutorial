@@ -1,5 +1,5 @@
 import { useState, ChangeEvent, useMemo } from 'react';
-import { HouseNode } from '@/HouseGraph/HousesGraph';
+import { HouseNode } from '@/feature/HouseGraph/HousesGraph';
 import { Card, Input, Flex, Button, Alert, Steps } from 'antd';
 import { PathPainter } from '@/feature/PathPainter';
 import { IndexDB } from '@/IndexDB';

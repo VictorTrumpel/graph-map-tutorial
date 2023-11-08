@@ -1,5 +1,5 @@
 import { Button } from 'antd';
-import { MainFlowScene } from '../scene/MainFlowScene';
+import { MainFlowScene } from '../../scene/MainFlowScene';
 import './HouseMenu.css';
 
 export const HouseMenu = ({ scene }: { scene: MainFlowScene }) => {
