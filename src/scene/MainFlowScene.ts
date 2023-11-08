@@ -11,6 +11,8 @@ export class MainFlowScene {
 
   private housePainter: HousePainter | null = null;
 
+  private raycaster: Raycaster = new Raycaster();
+
   pathPainter: PathPainter | null = null;
 
   constructor(actionScene: IActionScene, assetMap: Map<string, GLTF>) {
@@ -44,15 +46,13 @@ export class MainFlowScene {
   }
 
   private getIntersectWithGround(pointer: Vector2) {
-    const raycaster = new Raycaster();
-    raycaster.setFromCamera(pointer, this.actionScene.camera);
-    return raycaster.intersectObject(this.actionScene.ground)[0];
+    this.raycaster.setFromCamera(pointer, this.actionScene.camera);
+    return this.raycaster.intersectObject(this.actionScene.ground)[0];
   }
 
   private getIntersectWithScene(pointer: Vector2) {
-    const raycaster = new Raycaster();
-    raycaster.setFromCamera(pointer, this.actionScene.camera);
-    return raycaster.intersectObjects(this.actionScene.scene.children, true);
+    this.raycaster.setFromCamera(pointer, this.actionScene.camera);
+    return this.raycaster.intersectObjects(this.actionScene.scene.children, true);
   }
 
   private addToScene(element: Object3D<Event>) {
