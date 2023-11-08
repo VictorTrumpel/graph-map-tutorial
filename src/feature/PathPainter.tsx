@@ -1,8 +1,8 @@
-import { HousesGraph } from '@/feature/HouseGraph/HousesGraph';
+import { HousesGraph } from '@/shared/HouseGraph/HousesGraph';
 import { IndexDB } from '@/IndexDB';
 import { PathLine } from '@/shared/PathLine';
 import { House } from '@/shared/House';
-import { HouseNode } from '@/feature/HouseGraph/HousesGraph';
+import { HouseNode } from '@/shared/HouseGraph/HousesGraph';
 import { Vector2, Intersection, Object3D, Event } from 'three';
 
 export class PathPainter {
@@ -86,7 +86,7 @@ export class PathPainter {
     const houseFrom = this.houseFrom;
     const fromPathLine = this.fromPathLine;
 
-    const houseGraph = this.housesPathGraph.graph;
+    const houseGraph = this.housesPathGraph.map;
 
     const isPathStarted = houseFrom && fromPathLine;
 
@@ -124,9 +124,9 @@ export class PathPainter {
 
     if (!housesGraph) return;
 
-    this.housesPathGraph = new HousesGraph(housesGraph.graph);
+    this.housesPathGraph = new HousesGraph(housesGraph.map);
 
-    const graph = this.housesPathGraph.graph;
+    const graph = this.housesPathGraph.map;
 
     const queue = [...graph.values()];
 

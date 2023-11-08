@@ -11,10 +11,10 @@ export class HouseNode {
 }
 
 export class HousesGraph {
-  readonly graph: Map<string, HouseNode> = new Map();
+  readonly map: Map<string, HouseNode> = new Map();
 
-  constructor(graph?: HousesGraph['graph']) {
-    if (graph) this.graph = graph;
+  constructor(houseMap?: HousesGraph['map']) {
+    if (houseMap) this.map = houseMap;
   }
 
   addChildren(node1: HouseNode, node2: HouseNode) {
@@ -28,8 +28,8 @@ export class HousesGraph {
     node1.childrenIds.add(node2.id);
     node2.childrenIds.add(node1.id);
 
-    this.graph.set(node1.id, node1);
-    this.graph.set(node2.id, node2);
+    this.map.set(node1.id, node1);
+    this.map.set(node2.id, node2);
   }
 
   hasPath(startNode: HouseNode, nodeToFind: HouseNode) {

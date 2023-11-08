@@ -21,17 +21,17 @@ describe('Тестирование метода addChildren', () => {
     expect(house2.children.size).toBe(1);
     expect(house1.childrenIds.has(house2.id)).toBe(true);
     expect(house2.childrenIds.has(house1.id)).toBe(true);
-    expect(houseGraph.graph.get(house1.id)).toBe(house1);
-    expect(houseGraph.graph.get(house2.id)).toBe(house2);
+    expect(houseGraph.map.get(house1.id)).toBe(house1);
+    expect(houseGraph.map.get(house2.id)).toBe(house2);
 
     houseGraph.addChildren(house1, house3);
     expect(house1.children.size).toBe(2);
     expect(house3.children.size).toBe(1);
     expect(house1.childrenIds.has(house3.id)).toBe(true);
     expect(house3.childrenIds.has(house1.id)).toBe(true);
-    expect(houseGraph.graph.get(house1.id)).toBe(house1);
-    expect(houseGraph.graph.get(house2.id)).toBe(house2);
-    expect(houseGraph.graph.get(house3.id)).toBe(house3);
+    expect(houseGraph.map.get(house1.id)).toBe(house1);
+    expect(houseGraph.map.get(house2.id)).toBe(house2);
+    expect(houseGraph.map.get(house3.id)).toBe(house3);
 
     houseGraph.addChildren(house1, house2);
     expect(house1.children.size).toBe(2);

@@ -1,6 +1,6 @@
-import { HousesGraph } from './feature/HouseGraph/HousesGraph';
+import { HousesGraph } from './shared/HouseGraph/HousesGraph';
 
-type TableCols = {
+export type TableCols = {
   id: string;
   positionX: number;
   positionZ: number;
