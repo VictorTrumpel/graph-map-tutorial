@@ -3,17 +3,12 @@ import { IndexDB } from '@/IndexDB';
 import { PathLine } from '@/shared/PathLine';
 import { House } from '@/shared/House';
 import { HouseNode } from '@/feature/HouseGraph/HousesGraph';
-import { Camera, Raycaster, Scene, Vector2, Renderer, Intersection, Object3D, Event } from 'three';
-import { Ground } from '@/shared/Ground';
-import { IActionScene } from '@/IActionScene';
+import { Vector2, Intersection, Object3D, Event } from 'three';
 
 export class PathPainter {
   housesPathGraph = new HousesGraph();
 
   private indexDb: IndexDB = new IndexDB();
-
-  private scene: Scene;
-  private camera: Camera;
 
   readonly housesMap: Map<string, House>;
   readonly pathMap: Map<string, PathLine> = new Map();
@@ -24,10 +19,10 @@ export class PathPainter {
   getPointerPosition = (_: PointerEvent | MouseEvent) => new Vector2();
   getIntersectWithGround: (pointer: Vector2) => Intersection<Object3D<Event>> | null = () => null;
   getIntersectWithScene: (pointer: Vector2) => Intersection<Object3D<Event>>[] | null = () => null;
+  addToScene: (element: Object3D<Event>) => void = () => null;
+  removeFromScene: (element: Object3D<Event>) => void = () => null;
 
-  constructor(actionScene: IActionScene, housesMap: Map<string, House>) {
-    this.scene = actionScene.scene;
-    this.camera = actionScene.camera;
+  constructor(housesMap: Map<string, House>) {
     this.housesMap = housesMap;
 
     window.addEventListener('dblclick', this.handleWindowDbClick);
@@ -38,7 +33,7 @@ export class PathPainter {
   private handleKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'Escape' && this.fromPathLine) {
       this.houseFrom = null;
-      this.scene.remove(this.fromPathLine);
+      this.removeFromScene(this.fromPathLine);
     }
     window.removeEventListener('keydown', this.handleKeyDown);
   };
@@ -84,7 +79,7 @@ export class PathPainter {
       [house.model.position.x, 0, house.model.position.z]
     );
 
-    this.scene.add(this.fromPathLine);
+    this.addToScene(this.fromPathLine);
   }
 
   private finishPathTo(houseTo: House) {
@@ -163,7 +158,7 @@ export class PathPainter {
 
     this.pathMap.set(`${houseFrom.id}-${houseTo.id}`, pathLine);
 
-    this.scene.add(pathLine);
+    this.addToScene(pathLine);
   }
 
   private aimPathLine(pointer: Vector2) {
