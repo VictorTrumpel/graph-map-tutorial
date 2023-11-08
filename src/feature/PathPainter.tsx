@@ -52,14 +52,14 @@ export class PathPainter {
     const isPathStarted = this.houseFrom === null;
 
     if (isPathStarted) {
-      this.startPathFrom(house);
+      this.startMountPathFrom(house);
 
       window.addEventListener('keydown', this.handleKeyDown);
       window.addEventListener('pointermove', this.handleMouseMove);
       return;
     }
 
-    this.finishPathTo(house);
+    this.finishMountPathTo(house);
     window.removeEventListener('keydown', this.handleKeyDown);
     window.removeEventListener('pointermove', this.handleMouseMove);
   };
@@ -70,7 +70,7 @@ export class PathPainter {
     this.aimPathLine(pointer);
   };
 
-  private startPathFrom(house: House) {
+  private startMountPathFrom(house: House) {
     this.houseFrom = house;
 
     this.fromPathLine = new PathLine();
@@ -82,7 +82,7 @@ export class PathPainter {
     this.addToScene(this.fromPathLine);
   }
 
-  private finishPathTo(houseTo: House) {
+  private finishMountPathTo(houseTo: House) {
     const houseFrom = this.houseFrom;
     const fromPathLine = this.fromPathLine;
 
