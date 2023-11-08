@@ -92,20 +92,29 @@ export class PathPainter {
 
     if (!isPathStarted) return;
 
+    this.houseFrom = null;
+    this.fromPathLine = null;
+
+    const hasAlreadyPath =
+      this.pathMap.has(`${houseFrom.id}-${houseTo.id}`) ||
+      this.pathMap.has(`${houseTo.id}-${houseFrom.id}`);
+
+    if (hasAlreadyPath) {
+      this.removeFromScene(fromPathLine);
+      return;
+    }
+
     const positionFrom = houseFrom.model.position;
     const positionTo = houseTo.model.position;
 
     fromPathLine.setFromTo([positionFrom.x, 0, positionFrom.z], [positionTo.x, 0, positionTo.z]);
 
-    const houseNode1 = houseGraph.get(houseFrom.id) || new HouseNode(houseFrom.id);
-    const houseNode2 = houseGraph.get(houseTo.id) || new HouseNode(houseTo.id);
+    const houseNodeFrom = houseGraph.get(houseFrom.id) || new HouseNode(houseFrom.id);
+    const houseNodeTo = houseGraph.get(houseTo.id) || new HouseNode(houseTo.id);
 
     this.pathMap.set(`${houseFrom.id}-${houseTo.id}`, fromPathLine);
 
-    this.housesPathGraph.addChildren(houseNode1, houseNode2);
-
-    this.houseFrom = null;
-    this.fromPathLine = null;
+    this.housesPathGraph.addChildren(houseNodeFrom, houseNodeTo);
 
     this.indexDb.saveHousesGraph(this.housesPathGraph);
   }
