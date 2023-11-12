@@ -32,9 +32,7 @@ export class House {
   readonly configInfo: (typeof assetsConfig)[number];
   readonly orbitControls: OrbitControls;
 
-  private sphereController: Mesh | null = null;
-
-  private helperPlane: Mesh | null = null;
+  sphereController: Mesh | null = null;
 
   private _isMount: boolean = false;
 
@@ -42,57 +40,10 @@ export class House {
 
   private label: CSS2DObject | null = null;
 
-  onMount: (() => void) | null = null;
-
-  private handlePointerMove = (event: MouseEvent) => {
-    const pointer = this.getPointerPosition(event);
-
-    this.moveAlognGround(pointer);
-  };
-
-  private handlePointerUp = () => {
-    if (!this.sphereController) return;
-
-    const material = this.sphereController.material as MeshLambertMaterial & Color;
-
-    material.color.set(0x6794ab);
-
-    this.orbitControls.enabled = true;
-
-    if (this.helperPlane) this.scene.remove(this.helperPlane);
-
-    window.removeEventListener('pointermove', this.handlePointerMove);
-  };
-
-  private handlePointerDown = (event: MouseEvent) => {
-    const pointer = this.getPointerPosition(event);
-
-    this.raycaster.setFromCamera(pointer, this.camera);
-
-    const firstIntersect = this.raycaster.intersectObject(this.model, true)[0];
-
-    const isClickOnSphereController = firstIntersect?.object === this.sphereController;
-
-    if (!isClickOnSphereController || !this.sphereController) return;
-
-    const geometry = new PlaneGeometry(100, 100);
-    const material = new MeshMatcapMaterial({ opacity: 0, transparent: true });
-    this.helperPlane = new Mesh(geometry, material);
-    this.helperPlane.position.y = this.sphereController.position.y;
-    this.helperPlane.rotateX(-Math.PI / 2);
-    this.helperPlane.renderOrder = 1;
-
-    this.scene.add(this.helperPlane);
-
-    this.orbitControls.enabled = false;
-
-    const sphereMaterial = this.sphereController.material as MeshLambertMaterial & Color;
-
-    sphereMaterial.color.set(0xffe921);
-
-    window.addEventListener('pointerup', this.handlePointerUp);
-    window.addEventListener('pointermove', this.handlePointerMove);
-  };
+  onHouseArmPointerDown: () => void = () => null;
+  onHouseArmPointerUp: () => void = () => null;
+  onSaveHouse: () => void = () => null;
+  onMount: () => void = () => null;
 
   constructor(
     actionScene: IActionScene,
@@ -105,7 +56,6 @@ export class House {
     this.model.userData = this;
 
     this.attachMeshes();
-    this.setOpacity(0.5);
 
     this.renderer = actionScene.renderer;
     this.camera = actionScene.camera;
@@ -115,12 +65,29 @@ export class House {
     this.configInfo = config;
     this.orbitControls = actionScene.orbitControls;
 
-    window.addEventListener('pointermove', this.handlePointerMove);
     window.addEventListener('pointerdown', this.handlePointerDown);
   }
 
+  private handlePointerDown = (event: MouseEvent) => {
+    const pointer = this.getPointerPosition(event);
+
+    this.raycaster.setFromCamera(pointer, this.camera);
+
+    const firstIntersect = this.raycaster.intersectObject(this.model, true)[0];
+
+    const isClickOnSphereController = firstIntersect?.object === this.sphereController;
+
+    if (!isClickOnSphereController || !this.sphereController) return;
+
+    this.onHouseArmPointerDown();
+  };
+
   get isMount() {
     return this._isMount;
+  }
+
+  set isMount(mount: boolean) {
+    this._isMount = mount;
   }
 
   set name(name: string) {
@@ -131,36 +98,15 @@ export class House {
     return this._name;
   }
 
-  moveAlognGround(pointer: Vector2) {
-    if (!this.sphereController || !this.helperPlane) return;
+  removeArm() {
+    if (!this.sphereController) return;
 
-    this.raycaster.setFromCamera(pointer, this.camera);
-
-    const intersect = this.raycaster.intersectObject(this.helperPlane)[0];
-
-    if (!intersect) return;
-
-    this.model.position.x = intersect.point.x;
-    this.model.position.z = intersect.point.z;
+    this.model.remove(this.sphereController);
+    this.sphereController = null;
   }
 
-  mountHouse() {
-    this.setOpacity(1);
-    this._isMount = true;
-
-    if (this.sphereController) {
-      this.model.remove(this.sphereController);
-      this.sphereController = null;
-    }
-
-    if (this.label) {
-      this.label.position.y = this.configInfo.controllerPosition[1];
-    }
-
-    this.onMount?.();
-
-    window.removeEventListener('pointermove', this.handlePointerMove);
-    window.removeEventListener('pointermove', this.handlePointerMove);
+  saveHouse() {
+    this.onSaveHouse();
   }
 
   private attachMeshes() {
@@ -172,13 +118,19 @@ export class House {
     });
   }
 
-  private setOpacity(opacity: number) {
+  setOpacity(opacity: number) {
     this.model.traverse((child) => {
       if (child instanceof Mesh) {
         child.material.transparent = true;
         child.material.opacity = opacity;
       }
     });
+  }
+
+  setHouseArmColor(color: number) {
+    if (!this.sphereController) return;
+    const sphereMaterial = this.sphereController.material as MeshLambertMaterial & Color;
+    sphereMaterial.color.set(color);
   }
 
   createSphereController() {

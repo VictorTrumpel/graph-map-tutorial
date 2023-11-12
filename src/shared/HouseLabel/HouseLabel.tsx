@@ -28,7 +28,7 @@ export const HouseLabel = ({ house }: PropsType) => {
     }
 
     if (error) return;
-    house.mountHouse();
+    house.saveHouse();
     setIsMount(true);
   };
 
