@@ -23,14 +23,8 @@ import { assetsConfig } from '@/constants/assetsConfig';
 
 export class House {
   readonly model: Group;
-  readonly renderer: Renderer;
-  readonly scene: Scene;
-  readonly camera: PerspectiveCamera;
-  readonly ground: Ground;
-  readonly raycaster = new Raycaster();
   readonly id: string;
   readonly configInfo: (typeof assetsConfig)[number];
-  readonly orbitControls: OrbitControls;
 
   sphereController: Mesh | null = null;
 
@@ -45,42 +39,16 @@ export class House {
   onSaveHouse: () => void = () => null;
   onMount: () => void = () => null;
 
-  constructor(
-    actionScene: IActionScene,
-    model: Group,
-    config: (typeof assetsConfig)[number],
-    id?: string
-  ) {
+  constructor(model: Group, config: (typeof assetsConfig)[number], id?: string) {
     this.model = model;
 
     this.model.userData = this;
 
     this.attachMeshes();
 
-    this.renderer = actionScene.renderer;
-    this.camera = actionScene.camera;
-    this.scene = actionScene.scene;
-    this.ground = actionScene.ground;
     this.id = id || uuidv4();
     this.configInfo = config;
-    this.orbitControls = actionScene.orbitControls;
-
-    window.addEventListener('pointerdown', this.handlePointerDown);
   }
-
-  private handlePointerDown = (event: MouseEvent) => {
-    const pointer = this.getPointerPosition(event);
-
-    this.raycaster.setFromCamera(pointer, this.camera);
-
-    const firstIntersect = this.raycaster.intersectObject(this.model, true)[0];
-
-    const isClickOnSphereController = firstIntersect?.object === this.sphereController;
-
-    if (!isClickOnSphereController || !this.sphereController) return;
-
-    this.onHouseArmPointerDown();
-  };
 
   get isMount() {
     return this._isMount;
@@ -162,14 +130,5 @@ export class House {
     this.label.position.z = this.configInfo.labelPosition[2];
 
     this.model.add(this.label);
-  }
-
-  private getPointerPosition(event: PointerEvent | MouseEvent) {
-    const pointer = new Vector2();
-
-    pointer.x = (event.clientX / this.renderer.domElement.clientWidth) * 2 - 1;
-    pointer.y = -(event.clientY / this.renderer.domElement.clientHeight) * 2 + 1;
-
-    return pointer;
   }
 }

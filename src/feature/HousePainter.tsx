@@ -7,6 +7,10 @@ import {
   Color,
   Raycaster,
   Vector2,
+  Object3D,
+  Group,
+  Intersection,
+  Event,
 } from 'three';
 import { House } from '@/shared/House';
 import { IActionScene } from '@/IActionScene';
@@ -14,7 +18,6 @@ import { IndexDB } from '@/IndexDB';
 import { assetsConfig } from '@/constants/assetsConfig';
 
 export class HousePainter {
-  private actionScene: IActionScene;
   private indexDb: IndexDB = new IndexDB();
   private assetMap: Map<string, GLTF>;
 
@@ -24,20 +27,28 @@ export class HousePainter {
 
   private helperPlane: Mesh | null = null;
 
-  private raycaster = new Raycaster();
+  getPointerPosition = (_: PointerEvent | MouseEvent) => new Vector2();
+  getIntersectWithSprite: (
+    pointer: Vector2,
+    sprite: Object3D<Event> | Group | Mesh
+  ) => Intersection<Object3D<Event>> | null = () => null;
+  addToScene: (element: Object3D<Event> | Group) => void = () => null;
+  enableOrbitControl: () => void = () => null;
+  disableOrbitControl: () => void = () => null;
+  removeFromScene: (element: Object3D<Event> | Group | Mesh) => void = () => null;
 
-  constructor(actionScene: IActionScene, assetMap: Map<string, GLTF>) {
-    this.actionScene = actionScene;
+  constructor(assetMap: Map<string, GLTF>) {
     this.assetMap = assetMap;
 
     window.addEventListener('pointerdown', this.handleWindowClick);
+    window.addEventListener('pointerdown', this.handlePointerDown);
 
     this.mountHousesFromIndexDb();
   }
 
   private handleSaveDraftHouse = () => {
     if (!this.draftHouse) return;
-    this.saveHouse(this.draftHouse, this.draftHouse?.name);
+    this.saveHouse(this.draftHouse);
   };
 
   private handlePointerMove = (event: MouseEvent) => {
@@ -57,9 +68,9 @@ export class HousePainter {
     this.helperPlane.rotateX(-Math.PI / 2);
     this.helperPlane.renderOrder = 1;
 
-    this.actionScene.scene.add(this.helperPlane);
+    this.addToScene(this.helperPlane);
 
-    this.actionScene.orbitControls.enabled = false;
+    this.disableOrbitControl();
 
     const sphereMaterial = houseArm.material as MeshLambertMaterial & Color;
 
@@ -67,6 +78,20 @@ export class HousePainter {
 
     window.addEventListener('pointerup', this.handleArmOfDraftHousePointerUp);
     window.addEventListener('pointermove', this.handlePointerMove);
+  };
+
+  private handlePointerDown = (event: MouseEvent) => {
+    if (!this.draftHouse) return;
+
+    const pointer = this.getPointerPosition(event);
+
+    const firstIntersect = this.getIntersectWithSprite(pointer, this.draftHouse.model);
+
+    const isClickOnSphereController = firstIntersect?.object === this.draftHouse.sphereController;
+
+    if (!isClickOnSphereController || !this.draftHouse.sphereController) return;
+
+    this.handleArmOfDraftHousePointerDown();
   };
 
   private handleArmOfDraftHousePointerUp = () => {
@@ -78,10 +103,10 @@ export class HousePainter {
 
     houseArmMaterial.color.set(0x6794ab);
 
-    this.actionScene.orbitControls.enabled = true;
+    this.enableOrbitControl();
 
     if (this.helperPlane) {
-      this.actionScene.scene.remove(this.helperPlane);
+      this.removeFromScene(this.helperPlane);
     }
 
     window.removeEventListener('pointermove', this.handlePointerMove);
@@ -89,7 +114,7 @@ export class HousePainter {
 
   private handleWindowClick = () => {};
 
-  saveHouse(house: House, title: string) {
+  saveHouse(house: House) {
     if (!house) return;
 
     house.setOpacity(1);
@@ -111,7 +136,7 @@ export class HousePainter {
 
     if (!this.draftHouse) return;
 
-    this.actionScene.scene.add(this.draftHouse.model);
+    this.addToScene(this.draftHouse.model);
   }
 
   private createDraftHouse(assetTitle: string) {
@@ -134,15 +159,11 @@ export class HousePainter {
     for (const info of housesInfo) {
       const house = this.createHouseByAssetTitle(info.assetTitle, info.id);
 
-      console.log('house :>> ', house);
-
       if (!house) continue;
 
       house.name = info.houseName;
 
-      console.log('house :>> ', house);
-
-      this.actionScene.scene.add(house.model);
+      this.addToScene(house.model);
 
       this.housesMap.set(house.id, house);
 
@@ -164,7 +185,7 @@ export class HousePainter {
 
     const houseModel = houseGLTF.scene.clone(true);
 
-    const house = new House(this.actionScene, houseModel, assetConfig, id);
+    const house = new House(houseModel, assetConfig, id);
 
     return house;
   }
@@ -174,22 +195,11 @@ export class HousePainter {
 
     if (!houseArm || !this.helperPlane || !this.draftHouse) return;
 
-    this.raycaster.setFromCamera(pointer, this.actionScene.camera);
-
-    const intersect = this.raycaster.intersectObject(this.helperPlane)[0];
+    const intersect = this.getIntersectWithSprite(pointer, this.helperPlane);
 
     if (!intersect) return;
 
     this.draftHouse.model.position.x = intersect.point.x;
     this.draftHouse.model.position.z = intersect.point.z;
-  }
-
-  private getPointerPosition(event: PointerEvent | MouseEvent) {
-    const pointer = new Vector2();
-
-    pointer.x = (event.clientX / this.actionScene.renderer.domElement.clientWidth) * 2 - 1;
-    pointer.y = -(event.clientY / this.actionScene.renderer.domElement.clientHeight) * 2 + 1;
-
-    return pointer;
   }
 }

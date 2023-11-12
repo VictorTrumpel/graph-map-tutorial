@@ -1,5 +1,5 @@
 import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
-import { Vector2, Raycaster, Object3D, Event } from 'three';
+import { Vector2, Raycaster, Object3D, Event, Group, Mesh } from 'three';
 import { IActionScene } from '@/IActionScene';
 import { PathPainter } from '@/feature/PathPainter';
 import { HousePainter } from '@/feature/HousePainter';
@@ -21,8 +21,14 @@ export class MainFlowScene {
   }
 
   async start() {
-    const housePainter = new HousePainter(this.actionScene, this.assetMap);
+    const housePainter = new HousePainter(this.assetMap);
     this.housePainter = housePainter;
+    this.housePainter.getPointerPosition = this.getPointerPosition.bind(this);
+    this.housePainter.addToScene = this.addToScene.bind(this);
+    this.housePainter.removeFromScene = this.removeFromScene.bind(this);
+    this.housePainter.getIntersectWithSprite = this.getIntersectWithSprite.bind(this);
+    this.housePainter.enableOrbitControl = this.enableOrbitControl.bind(this);
+    this.housePainter.disableOrbitControl = this.disableOrbitControl.bind(this);
 
     this.pathPainter = new PathPainter(housePainter.housesMap);
     this.pathPainter.getPointerPosition = this.getPointerPosition.bind(this);
@@ -55,7 +61,23 @@ export class MainFlowScene {
     return this.raycaster.intersectObjects(this.actionScene.scene.children, true);
   }
 
-  private addToScene(element: Object3D<Event>) {
+  private getIntersectWithSprite(pointer: Vector2, sprite: Object3D<Event> | Group | Mesh) {
+    this.raycaster.setFromCamera(pointer, this.actionScene.camera);
+
+    const firstIntersect = this.raycaster.intersectObject(sprite, true)[0];
+
+    return firstIntersect;
+  }
+
+  private enableOrbitControl() {
+    this.actionScene.orbitControls.enabled = true;
+  }
+
+  private disableOrbitControl() {
+    this.actionScene.orbitControls.enabled = false;
+  }
+
+  private addToScene(element: Object3D<Event> | Group | Mesh) {
     this.actionScene.scene.add(element);
   }
 
